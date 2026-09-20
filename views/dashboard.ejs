@@ -1,0 +1,189 @@
+<%- include('partials/header') %>
+
+    <main class="container my-4 flex-grow-1">
+        <!-- En-tête du tableau de bord -->
+        <div
+            class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4 pb-3 border-bottom">
+            <div>
+                <h2 class="h4 fw-bold text-dark mb-1">
+                    <i class="fa-solid fa-gauge-high me-2 text-primary"></i>Tableau de bord — AhnizPaie
+                </h2>
+                <div class="d-flex flex-wrap align-items-center gap-2 text-muted small">
+                    <span>Bienvenue, <strong class="text-dark">
+                            <%= typeof user !=='undefined' && user ? user.username : 'admin' %>
+                        </strong></span>
+                    <span class="d-none d-sm-inline">•</span>
+                    <span class="badge bg-light text-dark border fw-normal px-2 py-1" id="algiers-clock">
+                        <i class="fa-regular fa-clock me-1 text-primary"></i>Chargement de l'heure...
+                    </span>
+                </div>
+            </div>
+            <div>
+                <span class="badge bg-success px-3 py-2 fs-6 shadow-sm">
+                    <i class="fa-solid fa-circle-check me-1"></i> Période : <%= typeof periodeActive !=='undefined' ?
+                        periodeActive : 'Septembre 2026' %>
+                </span>
+            </div>
+        </div>
+
+        <!-- Cartes statistiques métier -->
+        <div class="row g-3 mb-4">
+            <!-- Effectif Total -->
+            <div class="col-12 col-md-4">
+                <div class="card border-0 shadow-sm bg-white h-100">
+                    <div class="card-body d-flex align-items-center p-3">
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3 text-primary flex-shrink-0">
+                            <i class="fa-solid fa-users fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 min-w-0">
+                            <h6 class="card-subtitle text-muted mb-1 text-uppercase small py-1 text-truncate">Effectif
+                                Total</h6>
+                            <h3 class="card-title mb-0 fw-bold text-dark">
+                                <%= typeof totalEmployees !=='undefined' ? totalEmployees : (typeof employees
+                                    !=='undefined' ? employees.length : 0) %>
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Masse Salariale Brute -->
+            <div class="col-12 col-md-4">
+                <div class="card border-0 shadow-sm bg-white h-100">
+                    <div class="card-body d-flex align-items-center p-3">
+                        <div class="rounded-circle bg-info bg-opacity-10 p-3 me-3 text-info flex-shrink-0">
+                            <i class="fa-solid fa-coins fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 min-w-0">
+                            <h6 class="card-subtitle text-muted mb-1 text-uppercase small py-1 text-truncate">Masse
+                                Salariale Brute</h6>
+                            <h3 class="card-title mb-0 fw-bold text-dark text-truncate">
+                                <%= typeof totalBrut !=='undefined' ? totalBrut : '0,00' %> <small
+                                        class="fs-6 text-muted">DZD</small>
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Net à Payer -->
+            <div class="col-12 col-md-4">
+                <div class="card border-0 shadow-sm bg-white h-100">
+                    <div class="card-body d-flex align-items-center p-3">
+                        <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3 text-success flex-shrink-0">
+                            <i class="fa-solid fa-wallet fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 min-w-0">
+                            <h6 class="card-subtitle text-muted mb-1 text-uppercase small py-1 text-truncate">Total Net
+                                à Payer</h6>
+                            <h3 class="card-title mb-0 fw-bold text-success text-truncate">
+                                <%= typeof totalNet !=='undefined' ? totalNet : '0,00' %> <small
+                                        class="fs-6 text-muted">DZD</small>
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modules de gestion Paie -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white fw-bold text-dark py-3 border-bottom">
+                <i class="fa-solid fa-list-check me-2 text-primary"></i> Modules de gestion Paie
+            </div>
+            <div class="card-body p-3 p-md-4">
+                <div class="row g-3">
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <a href="/payroll"
+                            class="btn btn-outline-primary w-100 p-3 text-start shadow-sm h-100 d-flex flex-column justify-content-between">
+                            <i class="fa-solid fa-calculator fa-xl text-primary mb-3"></i>
+                            <div>
+                                <strong class="d-block mb-1 text-dark">Gestion Paie</strong>
+                                <small class="d-block text-muted" style="font-size: 11px;">Calculs & Synthèse</small>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <a href="/payroll/pointage"
+                            class="btn btn-outline-primary w-100 p-3 text-start shadow-sm h-100 d-flex flex-column justify-content-between">
+                            <i class="fa-solid fa-calendar-check fa-xl text-primary mb-3"></i>
+                            <div>
+                                <strong class="d-block mb-1 text-dark">Pointage</strong>
+                                <small class="d-block text-muted" style="font-size: 11px;">Saisie mensuelle</small>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <a href="/payroll/bulletin"
+                            class="btn btn-outline-primary w-100 p-3 text-start shadow-sm h-100 d-flex flex-column justify-content-between">
+                            <i class="fa-solid fa-file-invoice fa-xl text-primary mb-3"></i>
+                            <div>
+                                <strong class="d-block mb-1 text-dark">Fiche de Paie</strong>
+                                <small class="d-block text-muted" style="font-size: 11px;">Consulter & imprimer</small>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <a href="/employees"
+                            class="btn btn-outline-primary w-100 p-3 text-start shadow-sm h-100 d-flex flex-column justify-content-between">
+                            <i class="fa-solid fa-user-plus fa-xl text-primary mb-3"></i>
+                            <div>
+                                <strong class="d-block mb-1 text-dark">Salariés</strong>
+                                <small class="d-block text-muted" style="font-size: 11px;">Gestion employés</small>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <a href="/rubriques"
+                            class="btn btn-outline-primary w-100 p-3 text-start shadow-sm h-100 d-flex flex-column justify-content-between">
+                            <i class="fa-solid fa-sliders fa-xl text-primary mb-3"></i>
+                            <div>
+                                <strong class="d-block mb-1 text-dark">Rubriques</strong>
+                                <small class="d-block text-muted" style="font-size: 11px;">Barèmes IRG & Primes</small>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <a href="/declarations"
+                            class="btn btn-outline-primary w-100 p-3 text-start shadow-sm h-100 d-flex flex-column justify-content-between">
+                            <i class="fa-solid fa-print fa-xl text-primary mb-3"></i>
+                            <div>
+                                <strong class="d-block mb-1 text-dark">Déclarations</strong>
+                                <small class="d-block text-muted" style="font-size: 11px;">États DAS & CNAS</small>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function updateAlgiersClock() {
+            const options = {
+                timeZone: 'Africa/Algiers',
+                weekday: 'short',
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            const formatter = new Intl.DateTimeFormat('fr-DZ', options);
+            const clockElement = document.getElementById('algiers-clock');
+            if (clockElement) {
+                clockElement.innerHTML = `<i class="fa-regular fa-clock me-1 text-primary"></i>${formatter.format(new Date())}`;
+            }
+        }
+
+        setInterval(updateAlgiersClock, 1000);
+        updateAlgiersClock();
+    </script>
+
+    <%- include('partials/footer') %>

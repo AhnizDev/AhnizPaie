@@ -1,0 +1,76 @@
+<%- include('../partials/header') %>
+
+<main class="container my-4 flex-grow-1">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h2 class="h4 font-weight-bold text-dark mb-0">
+                <i class="fa-solid fa-users me-2 text-primary"></i>Gestion des Salariés
+            </h2>
+            <small class="text-muted">Liste et administration de l'effectif</small>
+        </div>
+        <div class="d-flex gap-2">
+            <!-- Bouton Global Banque (Indépendant et sans risque) -->
+            <a href="/payroll/export-bank-all" class="btn btn-success shadow-sm" style="background-color: #198754; color: white; padding: 8px 15px; border-radius: 4px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
+                📥 Virement Global Banque
+            </a>
+            
+            <a href="/employees/add" class="btn btn-primary shadow-sm">
+                <i class="fa-solid fa-user-plus me-1"></i> Nouveau Salarié
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Matricule</th>
+                            <th>Nom & Prénom</th>
+                            <th>N° Sécurité Sociale</th>
+                            <th>Emploi / Poste</th>
+                            <th>Salaire de Base</th>
+                            <th class="text-end pe-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (typeof employees !== 'undefined' && employees && employees.length > 0) { %>
+                            <% employees.forEach(emp => { %>
+                                <tr>
+                                    <td class="ps-3 fw-bold text-primary"><%= emp.matricule %></td>
+                                    <td><%= emp.nom %> <%= emp.prenom %></td>
+                                    <td><code><%= emp.num_ss || 'N/A' %></code></td>
+                                    <td><%= emp.emploi %></td>
+                                    <td><%= Number(emp.salaire_de_base || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2 }) %> DZD</td>
+                                    <td class="text-end pe-3">
+                                        <a href="/employees/show/<%= emp.id %>" class="btn btn-sm btn-outline-info me-1" title="Voir la fiche">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </a>
+                                        <a href="/employees/edit/<%= emp.id %>" class="btn btn-sm btn-outline-primary me-1" title="Modifier">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </a>
+                                        <form action="/employees/delete/<%= emp.id %>" method="POST" class="d-inline" onsubmit="return confirm('Confirmer la suppression de ce salarié ?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    <i class="fa-solid fa-user-slash fa-2x mb-2 d-block"></i>
+                                    Aucun salarié enregistré pour le moment.
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<%- include('../partials/footer') %>

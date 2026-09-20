@@ -1,0 +1,60 @@
+<%- include('../partials/header') %>
+
+<main class="container my-4 flex-grow-1">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <h2 class="h4 font-weight-bold text-dark mb-0">
+            <i class="fa-solid fa-user-pen me-2 text-primary"></i>Modifier le Salarié
+        </h2>
+        <a href="/employees" class="btn btn-outline-secondary btn-sm">
+            <i class="fa-solid fa-arrow-left me-1"></i> Annuler
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <form action="/employees/edit/<%= employee.id %>" method="POST">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label font-weight-bold">Matricule</label>
+                        <input type="text" name="matricule" class="form-control" value="<%= employee.matricule %>" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label font-weight-bold">Nom</label>
+                        <input type="text" name="nom" class="form-control" value="<%= employee.nom %>" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label font-weight-bold">Prénom</label>
+                        <input type="text" name="prenom" class="form-control" value="<%= employee.prenom %>" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label font-weight-bold">N° Sécurité Sociale</label>
+                        <input type="text" name="num_ss" class="form-control" value="<%= employee.num_ss || '' %>">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label font-weight-bold">Emploi / Fonction</label>
+                        <input type="text" name="emploi" class="form-control" value="<%= employee.emploi %>" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label font-weight-bold">Section / Atelier</label>
+                        <input type="text" name="section_atelier" class="form-control" value="<%= employee.section_atelier || '' %>">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label font-weight-bold">Salaire de Base (DZD)</label>
+                        <input type="number" step="0.01" name="salaire_de_base" class="form-control" value="<%= employee.salaire_de_base %>" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label font-weight-bold">Horaire Mensuel</label>
+                        <input type="number" step="0.01" name="horaire_mensuel" class="form-control" value="<%= employee.horaire_mensuel || 173.33 %>">
+                    </div>
+                </div>
+                <div class="mt-4 text-end">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Enregistrer les modifications
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<%- include('../partials/footer') %>

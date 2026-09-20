@@ -1,0 +1,768 @@
+<% const fmt=(val)=> {
+    let n = Number(val ? val : 0);
+    return isNaN(n) ? '0,00' : n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
+
+    const p = payroll || {};
+    const e = employee || {};
+    const c = company || {};
+
+    // 1. Valeurs des gains de base
+    const rawBase = p.salaireBase || p.salaire_base || e.salaire_de_base || e.salaire_base || 0;
+    const gainBase = (rawBase / 30) * (p.baseDays !== undefined ? Number(p.baseDays) : (p.base_days !== undefined ?
+    Number(p.base_days) : 30));
+    const valIep = Number(p.iep) || 0;
+    const valPri = Number(p.primeRendement || p.prime_rendement) || 0;
+
+    // 2. Indemnité de Panier
+    const rawPanierDays = p.panierDays !== undefined ? p.panierDays : (p.panier_days !== undefined ? p.panier_days :
+    null);
+    const panierDaysVal = (rawPanierDays !== null && rawPanierDays !== undefined && !isNaN(Number(rawPanierDays)))
+    ? Number(rawPanierDays)
+    : 22;
+
+    const rawPrimePanier = p.primePanier !== undefined ? p.primePanier : (p.prime_panier !== undefined ? p.prime_panier
+    : null);
+    const valPanier = (rawPrimePanier !== null && rawPrimePanier !== undefined && rawPrimePanier !== '' &&
+    !isNaN(Number(rawPrimePanier)))
+    ? Number(rawPrimePanier)
+    : (panierDaysVal * 200);
+
+    // 3. Prime de Véhicule
+    const valVehicule = (p.primeVehicule !== undefined && p.primeVehicule !== null && p.primeVehicule !== '' &&
+    Number(p.primeVehicule) > 0)
+    ? Number(p.primeVehicule)
+    : ((p.prime_vehicule !== undefined && p.prime_vehicule !== null && p.prime_vehicule !== '' &&
+    Number(p.prime_vehicule) > 0) ? Number(p.prime_vehicule) : 0);
+
+    // 4. Retenues & Mutuelle
+    const valMutuelle = Number(p.cotisationMutuelle || p.cotisation_mutuelle || 0);
+
+    // Assiettes & Calculs internes
+    const salaireDePoste = gainBase + valIep + valPri;
+    const totalBrutCalc = salaireDePoste + valPanier + valVehicule;
+    const valCnas = Number(p.cnasSalarial || p.cnas_salarial || (salaireDePoste * 0.09));
+    const valIrg = Number(p.irg || 0);
+    const totalRetenuesCalc = valCnas + valIrg + valMutuelle;
+
+    // Priorité backend
+    const displayNet = Number(p.net_a_payer || p.netAPayer || e.net_a_payer || 0) > 0
+    ? Number(p.net_a_payer || p.netAPayer || e.net_a_payer)
+    : (totalBrutCalc - totalRetenuesCalc);
+
+    const displayBrut = Number(p.total_brut || p.totalBrut || 0) > 0
+    ? Number(p.total_brut || p.totalBrut)
+    : totalBrutCalc;
+
+    const displayRetenues = Number(p.total_retenues || p.totalRetenues || 0) > 0
+    ? Number(p.total_retenues || p.totalRetenues)
+    : totalRetenuesCalc;
+
+    const displayAssietteIrg = p.assietteIrg || p.assiette_irg || (salaireDePoste - valCnas);
+
+    // Traitement du Solde Congés
+    let rawSolde = 0;
+    if (p.soldeConges !== undefined && p.soldeConges !== null && p.soldeConges !== '') {
+    rawSolde = Number(p.soldeConges);
+    } else if (p.solde_conges !== undefined && p.solde_conges !== null && p.solde_conges !== '') {
+    rawSolde = Number(p.solde_conges);
+    } else if (e.solde_conges !== undefined && e.solde_conges !== null && e.solde_conges !== '') {
+    rawSolde = Number(e.solde_conges);
+    } else if (e.soldeConges !== undefined && e.soldeConges !== null && e.soldeConges !== '') {
+    rawSolde = Number(e.soldeConges);
+    } else {
+    rawSolde = 5;
+    }
+
+    const soldeCongesDisplay = rawSolde;
+    %>
+    <!DOCTYPE html>
+    <html lang="fr">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Bulletin de Paie - <%= c.name || c.raison_sociale || 'EURL AHNIZTECH' %> - <%= p.period || p.periode
+                    || 'Octobre 2026' %>
+        </title>
+        <style>
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            }
+
+            body {
+                background-color: #eef2f7;
+                padding: 20px;
+                color: #222;
+                font-size: 11px;
+            }
+
+            .no-print {
+                max-width: 820px;
+                margin: 0 auto 15px auto;
+                display: flex;
+                justify-content: flex-end;
+                gap: 10px;
+            }
+
+            .btn {
+                padding: 8px 18px;
+                font-size: 13px;
+                font-weight: bold;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+            }
+
+            .btn-print {
+                background: #198754;
+                color: #fff;
+            }
+
+            .btn-print:hover {
+                background: #157347;
+            }
+
+            .btn-back {
+                background: #6c757d;
+                color: #fff;
+            }
+
+            .btn-back:hover {
+                background: #5c636a;
+            }
+
+            .btn-bank {
+                background: #0d6efd;
+                color: #fff;
+            }
+
+            .btn-bank:hover {
+                background: #0b5ed7;
+            }
+
+            .bulletin-container {
+                max-width: 820px;
+                margin: 0 auto;
+                background: #fff;
+                padding: 30px;
+                border: 1.5px solid #333;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            }
+
+            .header-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 12px;
+            }
+
+            .header-table td {
+                border: none;
+                padding: 2px 0;
+                font-size: 11px;
+                vertical-align: top;
+            }
+
+            .company-name {
+                font-size: 14px;
+                font-weight: bold;
+                text-transform: uppercase;
+                color: #0d6efd;
+                margin-bottom: 3px;
+            }
+
+            .title-box {
+                text-align: center;
+                font-size: 14px;
+                font-weight: bold;
+                text-transform: uppercase;
+                border: 2px solid #222;
+                padding: 8px;
+                margin: 12px 0 15px 0;
+                background-color: #f1f3f5;
+                letter-spacing: 0.5px;
+            }
+
+            .info-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 15px;
+            }
+
+            .info-table th,
+            .info-table td {
+                border: 1px solid #444;
+                padding: 5px 8px;
+                font-size: 10.5px;
+            }
+
+            .info-table th {
+                background-color: #e9ecef;
+                text-align: left;
+                width: 16%;
+                font-weight: 600;
+                color: #333;
+            }
+
+            .table-responsive {
+                width: 100%;
+                overflow-x: auto;
+                margin-bottom: 12px;
+            }
+
+            .payroll-table {
+                width: 100%;
+                border-collapse: collapse;
+                min-width: 600px;
+            }
+
+            .payroll-table th,
+            .payroll-table td {
+                border: 1px solid #444;
+                padding: 5px 7px;
+                font-size: 10.5px;
+            }
+
+            .payroll-table th {
+                background-color: #343a40;
+                color: #fff;
+                text-align: center;
+                font-weight: bold;
+                text-transform: uppercase;
+                font-size: 9.5px;
+                letter-spacing: 0.5px;
+            }
+
+            .payroll-table td.num {
+                text-align: right;
+            }
+
+            .payroll-table td.center {
+                text-align: center;
+            }
+
+            .payroll-table tr.subtotal {
+                font-weight: bold;
+                background-color: #f8f9fa;
+            }
+
+            .net-container {
+                display: flex;
+                border: 2px solid #222;
+                background-color: #f8f9fa;
+                margin-bottom: 15px;
+            }
+
+            .net-words {
+                flex: 1;
+                padding: 10px;
+                border-right: 2px solid #222;
+                font-size: 11px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+
+            .net-amount {
+                width: 260px;
+                padding: 8px;
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                background-color: #e7f5ff;
+            }
+
+            .net-amount .label {
+                font-size: 11px;
+                font-weight: bold;
+                text-transform: uppercase;
+                color: #084298;
+            }
+
+            .net-amount .val {
+                font-size: 17px;
+                font-weight: bold;
+                color: #052c65;
+                margin-top: 3px;
+            }
+
+            .footer-tables {
+                display: flex;
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+
+            .footer-tables>div {
+                flex: 1;
+            }
+
+            .footer-tables table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            .footer-tables th,
+            .footer-tables td {
+                border: 1px solid #444;
+                padding: 4px 8px;
+                font-size: 10px;
+            }
+
+            .footer-tables th {
+                background-color: #e9ecef;
+                text-align: center;
+                font-weight: bold;
+                text-transform: uppercase;
+            }
+
+            .signatures {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 30px;
+                padding: 0 40px;
+                font-size: 11px;
+            }
+
+            .sig-box {
+                text-align: center;
+                font-weight: bold;
+                width: 200px;
+                height: 60px;
+            }
+
+            @media screen and (max-width: 768px) {
+                body {
+                    padding: 8px;
+                }
+
+                .bulletin-container {
+                    padding: 12px;
+                }
+
+                .no-print {
+                    flex-direction: column;
+                    width: 100%;
+                    gap: 8px;
+                    margin-bottom: 10px;
+                }
+
+                .btn {
+                    width: 100%;
+                    padding: 10px;
+                    text-align: center;
+                    justify-content: center;
+                }
+
+                .header-table tr,
+                .header-table td {
+                    display: block;
+                    width: 100% !important;
+                    text-align: left !important;
+                    margin-bottom: 8px;
+                }
+
+                .info-table tr {
+                    display: flex;
+                    flex-wrap: wrap;
+                    border-bottom: 1px solid #444;
+                }
+
+                .info-table th {
+                    width: 38% !important;
+                    background-color: #e9ecef;
+                    border: none;
+                    padding: 6px;
+                }
+
+                .info-table td {
+                    width: 62% !important;
+                    border: none;
+                    padding: 6px;
+                }
+
+                .net-container {
+                    flex-direction: column;
+                }
+
+                .net-words {
+                    border-right: none;
+                    border-bottom: 2px solid #222;
+                }
+
+                .net-amount {
+                    width: 100%;
+                }
+
+                .footer-tables {
+                    flex-direction: column;
+                    gap: 10px;
+                }
+
+                .signatures {
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 20px;
+                    padding: 0;
+                }
+            }
+
+            @media print {
+                @page {
+                    size: A4 portrait;
+                    margin: 6mm;
+                }
+
+                body {
+                    background: #fff;
+                    padding: 0;
+                }
+
+                .no-print {
+                    display: none !important;
+                }
+
+                .bulletin-container {
+                    border: none;
+                    padding: 0;
+                    width: 100%;
+                    max-width: none;
+                    box-shadow: none;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <div class="no-print">
+            <a href="/payroll/export-bank/<%= e.id || 1 %>" class="btn btn-bank">📥 Fichier Banque (Excel)</a>
+            <button onclick="window.history.back()" class="btn btn-back">⬅ Retour</button>
+            <button onclick="window.print()" class="btn btn-print">🖨️ Imprimer / PDF</button>
+        </div>
+
+        <div class="bulletin-container">
+            <!-- En-tête Société -->
+            <table class="header-table">
+                <tr>
+                    <td style="width: 55%;">
+                        <div class="company-name">
+                            <%= c.name || c.raison_sociale || 'EURL AHNIZTECH' %>
+                        </div>
+                        <%= c.address || c.adresse || 'Cité des Pères' %> - <%= c.postalCode || c.code_postal || '06000'
+                                %>
+                                <%= c.city || c.ville || 'Béjaïa' %><br>
+                                    <strong>N° CNAS :</strong>
+                                    <%= c.cnasNumber || c.cnas_number || c.numero_cnas || '9988776655' %><br>
+                                        <strong>NIF :</strong>
+                                        <%= c.nif || '002406012345678' %> | <strong>RC :</strong>
+                                            <%= c.rc || '24B0123456' %>
+                    </td>
+                    <td style="width: 45%; text-align: right;">
+                        <strong>Période de paie :</strong>
+                        <%= p.period || p.periode || 'Octobre 2026' %><br>
+                            <strong>Date d'édition :</strong>
+                            <%= p.issuedAt || p.issued_at || p.date_edition || '19/10/2026' %>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="title-box">BULLETIN DE PAIE</div>
+
+            <!-- Informations Salarié -->
+            <table class="info-table">
+                <tr>
+                    <th>Matricule</th>
+                    <td>
+                        <%= e.matricule || 'MAT-002' %>
+                    </td>
+                    <th>Nom & Prénom</th>
+                    <td colspan="3"><strong>
+                            <%= e.nom || e.first_name || '' %>
+                                <%= e.prenom || e.last_name || '' %>
+                        </strong></td>
+                </tr>
+                <tr>
+                    <th>N° Sec. Sociale</th>
+                    <td>
+                        <%= e.cnasSecu || e.cnas_secu || e.numero_secu || e.num_secu || '-' %>
+                    </td>
+                    <th>Fonction</th>
+                    <td colspan="3">
+                        <%= e.fonction || e.emploi || e.post || '-' %>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Date d'embauche</th>
+                    <td>
+                        <%= e.dateEmbauche || e.date_embauche || e.hire_date || '-' %>
+                    </td>
+                    <th>Sit. Familiale</th>
+                    <td>
+                        <%= e.situationFamiliale || e.situation_familiale || e.family_status || '-' %>
+                    </td>
+                    <th>Enfants</th>
+                    <td>
+                        <%= e.nombreEnfants !==undefined ? e.nombreEnfants : (e.nombre_enfants !==undefined ?
+                            e.nombre_enfants : (e.children_count || 0)) %>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Mode Règl.</th>
+                    <td>
+                        <%= p.paymentMethod || p.payment_method || e.mode_reglement || 'Virement bancaire' %>
+                    </td>
+                    <th>CCP / Compte</th>
+                    <td colspan="3">
+                        <%= e.accountNumber || e.account_number || e.compte_bancaire || e.Compte_bancaire ||
+                            e.compteBancaire || e.ccp || e.num_compte || '-' %>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Tableau des rubriques -->
+            <div class="table-responsive">
+                <table class="payroll-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 7%;">Code</th>
+                            <th style="width: 43%;">Désignation / Rubrique</th>
+                            <th style="width: 13%;">Nombre / Base</th>
+                            <th style="width: 10%;">Taux %</th>
+                            <th style="width: 14%;">Gains (DZD)</th>
+                            <th style="width: 13%;">Retenues (DZD)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 0010 Salaire de base -->
+                        <tr>
+                            <td class="center">0010</td>
+                            <td>Salaire de base proportionnel</td>
+                            <td class="num">
+                                <%= fmt(p.baseDays !==undefined ? p.baseDays : (p.base_days !==undefined ? p.base_days :
+                                    30)) %> j
+                            </td>
+                            <td class="center">-</td>
+                            <td class="num">
+                                <%= fmt(gainBase) %>
+                            </td>
+                            <td class="num"></td>
+                        </tr>
+
+                        <!-- 0110 IEP -->
+                        <% if (valIep> 0) { %>
+                            <tr>
+                                <td class="center">0110</td>
+                                <td>Indemnité d'Expérience Professionnelle (IEP)</td>
+                                <td class="num">
+                                    <%= p.iepRate || p.iep_rate || 0 %>%
+                                </td>
+                                <td class="center">-</td>
+                                <td class="num">
+                                    <%= fmt(valIep) %>
+                                </td>
+                                <td class="num"></td>
+                            </tr>
+                            <% } %>
+
+                                <!-- 0200 Prime de Rendement -->
+                                <% if (valPri> 0) { %>
+                                    <tr>
+                                        <td class="center">0200</td>
+                                        <td>Prime de Rendement (PRI / PRC)</td>
+                                        <td class="num">
+                                            <%= p.priRate || p.pri_rate || 0 %>%
+                                        </td>
+                                        <td class="center">-</td>
+                                        <td class="num">
+                                            <%= fmt(valPri) %>
+                                        </td>
+                                        <td class="num"></td>
+                                    </tr>
+                                    <% } %>
+
+                                        <!-- Subtotal Salaire de Poste -->
+                                        <tr class="subtotal">
+                                            <td colspan="4">SALAIRE DE POSTE (Assiette CNAS)</td>
+                                            <td class="num">
+                                                <%= fmt(salaireDePoste) %>
+                                            </td>
+                                            <td class="num"></td>
+                                        </tr>
+
+                                        <!-- 2110 Indemnité de Panier -->
+                                        <% if (valPanier> 0 || panierDaysVal > 0) { %>
+                                            <tr>
+                                                <td class="center">2110</td>
+                                                <td>Indemnité de Panier</td>
+                                                <td class="num">
+                                                    <%= panierDaysVal %> j
+                                                </td>
+                                                <td class="center">-</td>
+                                                <td class="num">
+                                                    <%= fmt(valPanier) %>
+                                                </td>
+                                                <td class="num"></td>
+                                            </tr>
+                                            <% } %>
+
+                                                <!-- 6300 Prime de Véhicule -->
+                                                <% if (valVehicule> 0) { %>
+                                                    <tr>
+                                                        <td class="center">6300</td>
+                                                        <td>Prime de Véhicule</td>
+                                                        <td class="center">1</td>
+                                                        <td class="center">-</td>
+                                                        <td class="num">
+                                                            <%= fmt(valVehicule) %>
+                                                        </td>
+                                                        <td class="num"></td>
+                                                    </tr>
+                                                    <% } %>
+
+                                                        <!-- 2010 CNAS -->
+                                                        <tr>
+                                                            <td class="center">2010</td>
+                                                            <td>Cotisation Sécurité Sociale (CNAS)</td>
+                                                            <td class="num">
+                                                                <%= fmt(salaireDePoste) %>
+                                                            </td>
+                                                            <td class="center">9,00 %</td>
+                                                            <td class="num"></td>
+                                                            <td class="num">
+                                                                <%= fmt(valCnas) %>
+                                                            </td>
+                                                        </tr>
+
+                                                        <!-- 7050 IRG -->
+                                                        <tr>
+                                                            <td class="center">7050</td>
+                                                            <td>Impôt sur le Revenu Global (IRG)</td>
+                                                            <td class="num">
+                                                                <%= fmt(displayAssietteIrg) %>
+                                                            </td>
+                                                            <td class="center">Barème</td>
+                                                            <td class="num"></td>
+                                                            <td class="num">
+                                                                <%= fmt(valIrg) %>
+                                                            </td>
+                                                        </tr>
+
+                                                        <!-- 9000 Mutuelle -->
+                                                        <% if (valMutuelle> 0) { %>
+                                                            <tr>
+                                                                <td class="center">9000</td>
+                                                                <td>Cotisation Mutuelle</td>
+                                                                <td class="center">1</td>
+                                                                <td class="center">-</td>
+                                                                <td class="num"></td>
+                                                                <td class="num">
+                                                                    <%= fmt(valMutuelle) %>
+                                                                </td>
+                                                            </tr>
+                                                            <% } %>
+                    </tbody>
+                    <tfoot>
+                        <tr class="subtotal">
+                            <td colspan="4" style="text-align: right;">TOTAUX BRUTS & RETENUES</td>
+                            <td class="num">
+                                <%= fmt(displayBrut) %>
+                            </td>
+                            <td class="num">
+                                <%= fmt(displayRetenues) %>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <!-- Net à payer -->
+            <div class="net-container">
+                <div class="net-words">
+                    <strong>Net à payer arrêté à la somme de :</strong><br>
+                    <em>
+                        <%= p.netInWords || p.net_in_words || '' %>
+                    </em>
+                </div>
+                <div class="net-amount">
+                    <span class="label">Net à Payer</span>
+                    <span class="val">
+                        <%= fmt(displayNet) %> DZD
+                    </span>
+                </div>
+            </div>
+
+            <!-- Tableaux bas : Cumuls & Charges Patronales -->
+            <div class="footer-tables">
+                <div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th colspan="2">CUMULS ANNUELS / PÉRIODE</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Cumul Imposable :</strong></td>
+                                <td class="num">
+                                    <%= fmt(p.cumulImposable || p.cumul_imposable || displayAssietteIrg) %>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Cumul CNAS :</strong></td>
+                                <td class="num">
+                                    <%= fmt(p.cumulCnas || p.cumul_cnas || salaireDePoste) %>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Solde Congés :</strong></td>
+                                <td class="num">
+                                    <%= soldeCongesDisplay %> jours
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th colspan="2">COTISATIONS PATRONALES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>CNAS Patronale (26%) :</strong></td>
+                                <td class="num">
+                                    <%= fmt(p.cnasPatronale || p.cnas_patronale || (salaireDePoste * 0.26)) %>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total Coût Employeur :</strong></td>
+                                <td class="num">
+                                    <%= fmt(p.totalCoutEmployeur || p.total_cout_employeur || (displayBrut +
+                                        (salaireDePoste * 0.26))) %>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Signatures -->
+            <div class="signatures">
+                <div class="sig-box">Signature de l'employé</div>
+                <div class="sig-box">Cachet & Signature de l'employeur</div>
+            </div>
+        </div>
+
+    </body>
+
+    </html>

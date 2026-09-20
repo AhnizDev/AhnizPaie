@@ -1,0 +1,216 @@
+<%- include('partials/header') %>
+
+<main class="container my-5 flex-grow-1">
+    
+    <!-- En-tête de la page -->
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <div>
+            <h2 class="fw-bold text-primary mb-1">
+                <i class="fa-solid fa-book-open me-2"></i>Manuel Technique et Guide d'Utilisation - AhnizPaie
+            </h2>
+            <p class="text-muted mb-0">Documentation complète de l'architecture, des modules RH, des calculs de paie et du pôle Déclarations</p>
+        </div>
+        <a href="/login" class="btn btn-outline-primary btn-sm fw-bold">
+            <i class="fa-solid fa-arrow-left me-1"></i> Retour à la connexion
+        </a>
+    </div>
+
+    <!-- Carte d'introduction -->
+    <div class="card border-0 shadow-sm mb-4 bg-light border-start border-primary border-4 p-3">
+        <div class="card-body">
+            <h5 class="fw-bold text-dark"><i class="fa-solid fa-circle-info me-2 text-primary"></i>Architecture et Objectif du Portail</h5>
+            <p class="card-text text-secondary mb-0">
+                AhnizPaie est une application web full-stack développée sous Node.js et Express.js, interconnectée à une base de données relationnelle sécurisée. Elle automatise l'ensemble du cycle de paie et la liasse déclarative légale en conformité stricte avec la législation algérienne (G50, BMC-CNAS, DAS et virements bancaires).
+            </p>
+        </div>
+    </div>
+
+    <!-- Section 1 : Modules Principaux -->
+    <h4 class="fw-bold mb-3 text-secondary"><i class="fa-solid fa-list-check me-2"></i>1. Modules Fonctionnels de l'Application</h4>
+    
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <span class="badge bg-primary rounded-circle mb-3 fs-6">1</span>
+                    <h5 class="card-title fw-bold">Gestion des Salariés (CRUD)</h5>
+                    <p class="card-text text-muted small">
+                        Administration centralisée de l'effectif : Matricule unique, N° Sécurité Sociale (CNAS), fonction, situation familiale, RIB/CCP et codes SWIFT bancaires.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <span class="badge bg-primary rounded-circle mb-3 fs-6">2</span>
+                    <h5 class="card-title fw-bold">Pointage et Variables</h5>
+                    <p class="card-text text-muted small">
+                        Saisie mensuelle des éléments variables : prime véhicule, jours de panier, cotisations mutuelles spécifiques et gestion des périodes actives[cite: 8].
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <span class="badge bg-primary rounded-circle mb-3 fs-6">3</span>
+                    <h5 class="card-title fw-bold">Moteur de Paie</h5>
+                    <p class="card-text text-muted small">
+                        Calcul automatisé et instantané du salaire brut, des assiettes imposables, de la retenue CNAS, de l'IRG progressif et du Net à payer.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <span class="badge bg-primary rounded-circle mb-3 fs-6">4</span>
+                    <h5 class="card-title fw-bold">Édition PDF & Historique</h5>
+                    <p class="card-text text-muted small">
+                        Génération dynamique des bulletins de paie officiels via PDFKit et archivage mensuel immuable garantissant la traçabilité des périodes clôturées.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <span class="badge bg-primary rounded-circle mb-3 fs-6">5</span>
+                    <h5 class="card-title fw-bold">Clôture Mensuelle</h5>
+                    <p class="card-text text-muted small">
+                        Fonction transactionnelle sécurisée (BEGIN/COMMIT) figeant les historiques, réinitialisant les compteurs du mois et basculant automatiquement vers la période suivante.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <span class="badge bg-primary rounded-circle mb-3 fs-6">6</span>
+                    <h5 class="card-title fw-bold">Export Bancaire Global</h5>
+                    <p class="card-text text-muted small">
+                        Génération instantanée de fichiers Excel (SheetJS) normés en 11 colonnes pour les virements de masse (Inhouse Bank, SWIFT, IBAN, Montants).
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 2 : Tableau de Bord des Déclarations (G50, CNAS, DAS) -->
+    <h4 class="fw-bold mb-3 text-secondary"><i class="fa-solid fa-file-invoice-dollar me-2"></i>2. Le Pôle des Déclarations Légales (Fiscales & Sociales)</h4>
+    
+    <div class="card border-0 shadow-sm p-4 bg-white mb-5">
+        <div class="row g-4">
+            <!-- Identification & Organismes -->
+            <div class="col-md-6 border-end">
+                <h5 class="fw-bold text-primary mb-3"><i class="fa-solid fa-building-columns me-2"></i>Identification & Organismes</h5>
+                <ul class="list-unstyled text-secondary small mb-0">
+                    <li class="mb-2"><strong>Raison Sociale & NIF :</strong> Paramétrage centralisé de l'entreprise (EURL AHNIZTECH)[cite: 8].</li>
+                    <li class="mb-2"><strong>Centre des Impôts (G50) :</strong> Rattachement direct à la recette des impôts compétente (ex: CDI Béjaïa)[cite: 8].</li>
+                    <li class="mb-2"><strong>Agence CNAS :</strong> Suivi de l'agence de rattachement de sécurité sociale et de l'effectif actif déclaré[cite: 8].</li>
+                </ul>
+            </div>
+
+            <!-- Volets de Déclarations -->
+            <div class="col-md-6">
+                <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-file-shield me-2"></i>Volets Déclaratifs Clés</h5>
+                <ul class="list-unstyled text-secondary small mb-0">
+                    <li class="mb-2"><strong>Déclaration G50 (IRG) :</strong> Calcul automatisé du montant de l'IRG traitements et salaires à verser avant le 20 du mois M+1[cite: 8].</li>
+                    <li class="mb-2"><strong>Bordereau CNAS (BMC) :</strong> Ventilation en temps réel de la part salariale (9%) et patronale (26%), exigible entre le 10 et le 15 du mois M+1[cite: 8].</li>
+                    <li class="mb-2"><strong>Déclaration Annuelle (DAS) :</strong> Récapitulatif global de l'exercice avec génération automatique du fichier plat normé et de l'état nominatif des salariés[cite: 8].</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Encadré explicatif : Périodicité et Cumul DAS en cours d'année -->
+        <div class="mt-4 pt-3 border-top">
+            <div class="alert alert-primary border-0 bg-light p-3 mb-0 rounded-3">
+                <h6 class="fw-bold text-primary mb-2">
+                    <i class="fa-solid fa-calendar-check me-2"></i>Précisions sur la Périodicité Déclarative et la DAS (YTD)
+                </h6>
+                <div class="row g-3 text-secondary small">
+                    <div class="col-md-6">
+                        <strong class="text-dark d-block mb-1">
+                            <i class="fa-solid fa-clock me-1 text-warning"></i> Obligations Mensuelles Strictes :
+                        </strong>
+                        <ul class="mb-0 ps-3">
+                            <li><strong>G50 (IRG Salaires) :</strong> Déclaration et paiement obligatoires avant le 20 du mois suivant (M+1).</li>
+                            <li><strong>BMC (Bordereau Mensuel CNAS - 35%) :</strong> Déclaration et paiement obligatoires avant le 15 du mois suivant (M+1).</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <strong class="text-dark d-block mb-1">
+                            <i class="fa-solid fa-chart-line me-1 text-info"></i> Role du Module DAS en cours d'année (ex: Septembre) :
+                        </strong>
+                        <p class="mb-0">
+                            La <strong>DAS officielle</strong> se dépose <strong>une seule fois par an</strong> (entre le 1er et le 31 janvier N+1). L'affichage de la DAS en cours d'année est une <strong>prévisualisation / cumul à date (YTD — Year-To-Date)</strong>. Le logiciel additionne les mois clôturés pour vous offrir un suivi en temps réel et vérifier la conformité du fichier <code>.txt</code> sans attendre la fin d'année.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3 : Règles Légales et Algorithmes de Calcul -->
+    <h4 class="fw-bold mb-3 text-secondary"><i class="fa-solid fa-calculator me-2"></i>3. Formules et Règles de Calcul Algériennes</h4>
+    
+    <div class="table-responsive shadow-sm rounded mb-5">
+        <table class="table table-striped table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Composante de Paie</th>
+                    <th>Formule Mathématique & Assiette</th>
+                    <th>Spécificités Techniques / Barème</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="fw-bold">Cotisation CNAS Salariale</td>
+                    <td><code>Salaire de base × 9%</code></td>
+                    <td>Retenue obligatoire à la charge du salarié pour la sécurité sociale.</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Cotisation CNAS Patronale</td>
+                    <td><code>Salaire de base × 26%</code></td>
+                    <td>Charge employeur intégrée dans le coût global (Total charge : 35%).</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Salaire Imposable (Assiette IRG)</td>
+                    <td><code>Salaire de base - CNAS (9%) + Prime Panier + Prime Véhicule</code></td>
+                    <td>Base soumise à l'Impôt sur le Revenu Global. (Prime Panier standard : 4 400 DZD).</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Calcul de l'IRG Brut & Net</td>
+                    <td>Barème progressif par tranches (0% à 35%) avec application d'un abattement de 40% (plafonné entre 1 000 DZD et 1 500 DZD).</td>
+                    <td>Ajustement spécifique intégré pour la tranche intermédiaire (30 000 à 35 000 DZD).</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Salaire Net à Payer</td>
+                    <td><code>(Salaire de base + Primes) - (CNAS Salariale + IRG + Mutuelle)</code></td>
+                    <td>Montant net final viré au salarié (Mutuelle standard par défaut : 0,00 DZD).</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Section 4 : Structure des Exports Bancaires -->
+    <h4 class="fw-bold mb-3 text-secondary"><i class="fa-solid fa-file-excel me-2"></i>4. Spécifications des Exports Excel (Banque)</h4>
+    <div class="card border-0 shadow-sm p-4 bg-white">
+        <p class="text-secondary">
+            L'application gère deux modes d'exportation sous format tableur (.xlsx) normalisé en 11 colonnes, compatibles avec les plateformes bancaires professionnelles :
+        </p>
+        <ul class="text-secondary mb-0">
+            <li><strong>Export Individuel :</strong> Génère un fichier ciblé pour un agent spécifique depuis sa fiche ou son bulletin.</li>
+            <li><strong>Export Global (Tous les salariés) :</strong> Parcourt l'ensemble de la table des employés par ordre croissant d'identifiant, injecte les coordonnées bancaires de l'entreprise donneuse d'ordre (Compte et code SWIFT paramétrés) sur la ligne d'en-tête, et liste dynamiquement chaque collaborateur avec son net à payer calculé en temps réel.</li>
+        </ul>
+    </div>
+
+</main>
+
+<%- include('partials/footer') %>

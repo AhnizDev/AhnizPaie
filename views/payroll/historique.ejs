@@ -1,0 +1,136 @@
+<%- include('../partials/header') %>
+
+<main class="container my-4 flex-grow-1">
+    <!-- En-Tête de page responsive -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h2 class="h3 mb-1 fw-bold text-primary">
+                <i class="fas fa-history me-2"></i>Historique des Bulletins Clôturés
+            </h2>
+            <p class="text-muted mb-0">Consultez et imprimez les archives de paie des mois précédents.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button onclick="window.print()" class="btn btn-outline-dark btn-sm">
+                <i class="fas fa-print me-1"></i> Imprimer l'État
+            </button>
+            <a href="/payroll" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-arrow-left me-1"></i> Retour au Tableau de Bord
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtre par Période -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <form action="/payroll/historique" method="GET" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="periodeFiltre" class="form-label fw-bold">Filtrer par Période :</label>
+                    <select name="periode" id="periodeFiltre" class="form-select">
+                        <option value="">-- Toutes les périodes --</option>
+                        <% if (typeof periodesDisponibles !== 'undefined' && periodesDisponibles.length > 0) { %>
+                            <% periodesDisponibles.forEach(p => { %>
+                                <option value="<%= p.periode %>" <%= periodeFiltre === p.periode ? 'selected' : '' %>>
+                                    <%= p.periode %>
+                                </option>
+                            <% }) %>
+                        <% } %>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-filter me-1"></i> Filtrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tableau des archives -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-2 p-md-4">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-hover align-middle mb-0" style="min-width: 1000px;">
+                    <thead class="table-dark text-center">
+                        <tr>
+                            <th>Période</th>
+                            <th>Matricule</th>
+                            <th>Employé</th>
+                            <th class="text-end">Salaire Base</th>
+                            <th class="text-end">Imposable</th>
+                            <th class="text-end">CNAS</th>
+                            <th class="text-end">IRG</th>
+                            <th class="text-end">Net à Payer</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% 
+                        let totBase = 0, totImp = 0, totCnas = 0, totIrg = 0, totNet = 0;
+                        if (typeof bulletins !== 'undefined' && bulletins.length > 0) { 
+                            bulletins.forEach(row => {
+                                // Extraction sécurisée depuis le JSONB PostgreSQL
+                                const details = (typeof row.details_json === 'object' && row.details_json !== null) 
+                                                ? row.details_json 
+                                                : (JSON.parse(row.details_json || '{}'));
+                                const emp = details.employee || {};
+
+                                // Cumul des totaux
+                                totBase += Number(row.salaire_base || 0);
+                                totImp  += Number(row.salaire_imposable || 0);
+                                totCnas += Number(row.cnas_salarie || 0);
+                                totIrg  += Number(row.irg || 0);
+                                totNet  += Number(row.net_a_payer || 0);
+                        %>
+                                <tr>
+                                    <td class="text-center fw-bold text-primary"><%= row.periode %></td>
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-dark font-monospace border">
+                                            <%= emp.matricule || 'N/A' %>
+                                        </span>
+                                    </td>
+                                    <td class="fw-semibold">
+                                        <%= (emp.nom || '').toUpperCase() %> <%= emp.prenom || '' %>
+                                    </td>
+                                    <td class="text-end"><%= Number(row.salaire_base || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2 }) %> DZD</td>
+                                    <td class="text-end"><%= Number(row.salaire_imposable || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2 }) %> DZD</td>
+                                    <td class="text-end"><%= Number(row.cnas_salarie || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2 }) %> DZD</td>
+                                    <td class="text-end"><%= Number(row.irg || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2 }) %> DZD</td>
+                                    <td class="text-end text-success fw-bold"><%= Number(row.net_a_payer || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2 }) %> DZD</td>
+                                    <td class="text-center">
+                                        <a href="/payroll/pdf/<%= row.employee_id %>?periode=<%= encodeURIComponent(row.periode) %>" 
+                                           class="btn btn-sm btn-outline-danger" target="_blank" title="Télécharger le PDF">
+                                            <i class="fas fa-file-pdf"></i> PDF
+                                        </a>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="9" class="text-center text-muted py-4">
+                                    Aucun historique de paie trouvé pour cette sélection.
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+
+                    <% if (typeof bulletins !== 'undefined' && bulletins.length > 0) { %>
+                        <!-- Ligne des Totaux de la Période -->
+                        <tfoot class="table-secondary fw-bold text-end">
+                            <tr>
+                                <td colspan="3" class="text-center text-dark">Masse Salariale Clôturée :</td>
+                                <td class="text-end"><%= totBase.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) %> DZD</td>
+                                <td class="text-end"><%= totImp.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) %> DZD</td>
+                                <td class="text-end"><%= totCnas.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) %> DZD</td>
+                                <td class="text-end"><%= totIrg.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) %> DZD</td>
+                                <td class="text-end text-success fs-6"><%= totNet.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) %> DZD</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    <% } %>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<%- include('../partials/footer') %>

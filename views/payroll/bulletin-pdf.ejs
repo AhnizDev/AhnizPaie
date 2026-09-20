@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Bulletin de Paie - <%= emp.nom || '' %>
+            <%= emp.prenom || '' %>
+    </title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 11px;
+            color: #000;
+            background-color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .bulletin-container {
+            max-width: 800px;
+            margin: 0 auto;
+            border: 1px solid #000;
+            padding: 15px;
+        }
+
+        .header-table,
+        .info-table,
+        .rubriques-table,
+        .totals-table,
+        .cumuls-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+
+        .header-table td {
+            vertical-align: top;
+        }
+
+        .company-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #003366;
+        }
+
+        .bulletin-title {
+            text-align: center;
+            font-size: 13px;
+            font-weight: bold;
+            border: 1px solid #000;
+            padding: 5px;
+            background-color: #f2f2f2;
+            margin: 10px 0;
+        }
+
+        table.bordered,
+        table.bordered th,
+        table.bordered td {
+            border: 1px solid #000;
+        }
+
+        th,
+        td {
+            padding: 4px 6px;
+            font-size: 10.5px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .text-end {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .fw-bold {
+            font-weight: bold;
+        }
+
+        .net-box {
+            border: 2px solid #003366;
+            background-color: #e6f0fa;
+            text-align: center;
+            padding: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #003366;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="bulletin-container">
+        <!-- En-tête Entreprise & Période -->
+        <table class="header-table">
+            <tr>
+                <td>
+                    <div class="company-title">EURL AHNIZTECH</div>
+                    <div>Cité des Pères, Béjaïa 06000</div>
+                    <div>N° CNAS : 9988776655 | NIF : 002406012345678</div>
+                </td>
+                <td class="text-end">
+                    <div><strong>Période de paie :</strong>
+                        <%= row.periode || periode || '' %>
+                    </div>
+                    <div><strong>Date d'édition :</strong>
+                        <%= new Date().toLocaleDateString('fr-FR') %>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <div class="bulletin-title">BULLETIN DE PAIE</div>
+
+        <% let emp={}; try { let details=typeof row.details_json==='string' ? JSON.parse(row.details_json) :
+            (row.details_json || {}); emp=details.employee || {}; } catch(e) { emp={}; } %>
+
+            <!-- Informations Employé -->
+            <table class="bordered info-table">
+                <tr>
+                    <td class="fw-bold" width="18%">Matricule</td>
+                    <td width="32%">
+                        <%= emp.matricule || row.matricule || 'N/A' %>
+                    </td>
+                    <td class="fw-bold" width="18%">Nom & Prénom</td>
+                    <td width="32%">
+                        <%= emp.nom || row.nom || '' %>
+                            <%= emp.prenom || row.prenom || '' %>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">N° Sec. Sociale</td>
+                    <td>
+                        <%= emp.n_sec_sociale || '-' %>
+                    </td>
+                    <td class="fw-bold">Fonction</td>
+                    <td>
+                        <%= emp.poste || 'Employé(e)' %>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Date d'embauche</td>
+                    <td>
+                        <%= emp.date_embauche || '-' %>
+                    </td>
+                    <td class="fw-bold">Sit. Familiale</td>
+                    <td>
+                        <%= emp.situation_familiale || 'Marié(e)' %> &nbsp; | &nbsp; <strong>Enfants:</strong>
+                            <%= emp.enfants || 0 %>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Mode Règl.</td>
+                    <td>Virement bancaire</td>
+                    <td class="fw-bold">CCP / Compte</td>
+                    <td>
+                        <%= emp.ccp || '0012345678/99' %>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Tableau des Rubriques -->
+            <table class="bordered rubriques-table">
+                <thead>
+                    <tr>
+                        <th width="10%">CODE</th>
+                        <th width="40%">DÉSIGNATION / RUBRIQUE</th>
+                        <th width="15%">NOMBRE / BASE</th>
+                        <th width="10%">TAUX %</th>
+                        <th width="12%">GAINS (DZD)</th>
+                        <th width="13%">RETENUES (DZD)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="text-center">0010</td>
+                        <td>Salaire de base proportionnel</td>
+                        <td class="text-center">30,00 j</td>
+                        <td class="text-center">-</td>
+                        <td class="text-end">
+                            <%= Number(row.salaire_base || 0).toLocaleString('fr-FR', {minimumFractionDigits: 2}) %>
+                        </td>
+                        <td class="text-end"></td>
+                    </tr>
+
+                    <tr class="fw-bold" style="background-color: #fafafa;">
+                        <td colspan="4" class="text-end">SALAIRE DE POSTE (Assiette CNAS)</td>
+                        <td class="text-end">
+                            <%= Number(row.salaire_base || 0).toLocaleString('fr-FR', {minimumFractionDigits: 2}) %>
+                        </td>
+                        <td class="text-end"></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">2010</td>
+                        <td>Cotisation Sécurité Sociale (CNAS)</td>
+                        <td class="text-center">
+                            <%= Number(row.salaire_base || 0).toLocaleString('fr-FR', {minimumFractionDigits: 2}) %>
+                        </td>
+                        <td class="text-center">9,00 %</td>
+                        <td class="text-end"></td>
+                        <td class="text-end">
+                            <%= Number(row.cnas_salarie || 0).toLocaleString('fr-FR', {minimumFractionDigits: 2}) %>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">7050</td>
+                        <td>Impôt sur le Revenu Global (IRG)</td>
+                        <td class="text-center">
+                            <%= Number(row.salaire_imposable || 0).toLocaleString('fr-FR', {minimumFractionDigits: 2})
+                                %>
+                        </td>
+                        <td class="text-center">Barème</td>
+                        <td class="text-end"></td>
+                        <td class="text-end">
+                            <%= Number(row.irg || 0).toLocaleString('fr-FR', {minimumFractionDigits: 2}) %>
+                        </td>
+                    </tr>
+                    <!-- Totaux -->
+                    <tr class="fw-bold">
+                        <td colspan="4" class="text-end">TOTAUX BRUTS & RETENUES</td>
+                        <td class="text-end">
+                            <%= Number(row.salaire_imposable || 0).toLocaleString('fr-FR', {minimumFractionDigits: 2})
+                                %>
+                        </td>
+                        <td class="text-end">
+                            <%= (Number(row.cnas_salarie || 0) + Number(row.irg || 0)).toLocaleString('fr-FR',
+                                {minimumFractionDigits: 2}) %>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Net à Payer & Arrêté -->
+            <table width="100%" style="margin-bottom: 10px;">
+                <tr>
+                    <td class="bordered" style="vertical-align: top; padding: 8px;" width="55%">
+                        <div style="font-size: 10px; margin-bottom: 5px;">Net à payer arrêté à la somme de :</div>
+                        <div style="font-style: italic; font-weight: bold;">Dinars Algériens...</div>
+                    </td>
+                    <td width="5%"></td>
+                    <td class="net-box" width="40%">
+                        NET À PAYER<br>
+                        <span style="font-size: 16px;">
+                            <%= Number(row.net_a_payer || 0).toLocaleString('fr-FR', {minimumFractionDigits: 2}) %> DZD
+                        </span>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Cumuls & Cotisations Patronales -->
+            <table width="100%">
+                <tr>
+                    <td width="48%" style="vertical-align: top;">
+                        <table class="bordered cumuls-table">
+                            <tr>
+                                <th colspan="2">CUMULS ANNUELS / PÉRIODE</th>
+                            </tr>
+                            <tr>
+                                <td>Cumul Imposable :</td>
+                                <td class="text-end">
+                                    <%= Number(row.cumul_imposable || 959182.74).toLocaleString('fr-FR',
+                                        {minimumFractionDigits: 2}) %>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Cumul CNAS :</td>
+                                <td class="text-end">
+                                    <%= Number(row.cumul_cnas || 85251.06).toLocaleString('fr-FR',
+                                        {minimumFractionDigits: 2}) %>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Solde Congés :</td>
+                                <td class="text-end">0 jours</td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td width="4%"></td>
+                    <td width="48%" style="vertical-align: top;">
+                        <table class="bordered cumuls-table">
+                            <tr>
+                                <th colspan="2">COTISATIONS PATRONALES</th>
+                            </tr>
+                            <tr>
+                                <td>CNAS Patronale (26%) :</td>
+                                <td class="text-end">
+                                    <%= (Number(row.salaire_base || 0) * 0.26).toLocaleString('fr-FR',
+                                        {minimumFractionDigits: 2}) %>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Total Coût Employeur :</td>
+                                <td class="text-end">
+                                    <%= (Number(row.salaire_base || 0) * 1.26).toLocaleString('fr-FR',
+                                        {minimumFractionDigits: 2}) %>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Signatures -->
+            <table width="100%" style="margin-top: 30px;">
+                <tr>
+                    <td class="text-center" width="50%"><strong>Signature de l'employé</strong></td>
+                    <td class="text-center" width="50%"><strong>Cachet & Signature de l'employeur</strong></td>
+                </tr>
+            </table>
+    </div>
+
+</body>
+
+</html>

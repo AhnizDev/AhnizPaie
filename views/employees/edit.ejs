@@ -1,0 +1,137 @@
+<%- include('../partials/header') %>
+
+    <main class="container my-4 flex-grow-1">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+            <div>
+                <h2 class="h4 font-weight-bold text-dark mb-0">
+                    <i class="fa-solid fa-user-pen me-2 text-primary"></i>Modifier le Salarié
+                </h2>
+                <small class="text-muted">Mise à jour des informations de <%= employee.nom %>
+                        <%= employee.prenom %></small>
+            </div>
+            <div>
+                <a href="/employees" class="btn btn-outline-secondary shadow-sm">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Retour à la liste
+                </a>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <form action="/employees/edit/<%= employee.id %>" method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Matricule</label>
+                            <input type="text" name="matricule" class="form-control" value="<%= employee.matricule %>"
+                                required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">N° Sécurité Sociale</label>
+                            <input type="text" name="num_ss" class="form-control" value="<%= employee.num_ss || '' %>">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Nom</label>
+                            <input type="text" name="nom" class="form-control" value="<%= employee.nom %>" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Prénom</label>
+                            <input type="text" name="prenom" class="form-control" value="<%= employee.prenom %>"
+                                required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Emploi / Poste</label>
+                            <input type="text" name="emploi" class="form-control" value="<%= employee.emploi || '' %>">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Section / Atelier</label>
+                            <input type="text" name="section_atelier" class="form-control"
+                                value="<%= employee.section_atelier || '' %>">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Salaire de Base (DZD)</label>
+                            <input type="number" step="0.01" name="salaire_de_base" class="form-control"
+                                value="<%= employee.salaire_de_base || 0 %>">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Horaire Mensuel (H)</label>
+                            <input type="number" step="0.01" name="horaire_mensuel" class="form-control"
+                                value="<%= employee.horaire_mensuel || 173.33 %>">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Date d'Entrée</label>
+                            <input type="date" name="date_entree" class="form-control"
+                                value="<%= employee.date_entree ? new Date(employee.date_entree).toISOString().split('T')[0] : '' %>">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Date de Naissance</label>
+                            <input type="date" name="date_naissance" class="form-control"
+                                value="<%= employee.date_naissance ? new Date(employee.date_naissance).toISOString().split('T')[0] : '' %>">
+                        </div>
+
+                        <!-- Situation Familiale & Nombre d'enfants -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Situation Familiale</label>
+                            <select name="situation_familiale" class="form-select">
+                                <option value="Marié(e)" <%= employee.situation_familiale === 'Marié(e)' ? 'selected' : '' %>>Marié(e)</option>
+                                <option value="Célibataire" <%= employee.situation_familiale === 'Célibataire' ? 'selected' : '' %>>Célibataire</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Nombre d'enfants</label>
+                            <input type="number" name="nombre_enfants" class="form-control"
+                                value="<%= (employee.nombre_enfants !== undefined && employee.nombre_enfants !== null) ? employee.nombre_enfants : 0 %>" min="0">
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">Adresse</label>
+                            <input type="text" name="adresse" class="form-control"
+                                value="<%= employee.adresse || '' %>">
+                        </div>
+
+                        <!-- Coordonnées Bancaires / CCP -->
+                        <div class="col-12 mt-4 pt-3 border-top">
+                            <h6 class="fw-bold text-primary mb-3">
+                                <i class="fa-solid fa-building-columns me-1"></i> Coordonnées Bancaires / CCP
+                            </h6>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Mode de Paiement</label>
+                            <select name="mode_paiement" class="form-select">
+                                <option value="Virement" <%= (employee.mode_paiement === 'Virement' || !employee.mode_paiement) ? 'selected' : '' %>>Virement Bancaire / CCP</option>
+                                <option value="Chèque" <%= employee.mode_paiement === 'Chèque' ? 'selected' : '' %>>Chèque</option>
+                                <option value="Espèces" <%= employee.mode_paiement === 'Espèces' ? 'selected' : '' %>>Espèces</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold">N° Compte / RIB / CCP (Account)</label>
+                            <input type="text" name="compte_bancaire" class="form-control"
+                                value="<%= employee.compte_bancaire || '' %>" placeholder="ex: 02700721010691100153">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Code SWIFT / BIC</label>
+                            <input type="text" name="swift" class="form-control"
+                                value="<%= employee.swift || '' %>" placeholder="ex: BNPADZALXXX">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Code Banque (BANK ID)</label>
+                            <input type="text" name="bank_id" class="form-control"
+                                value="<%= employee.bank_id || '' %>" placeholder="ex: 0270072101">
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top text-end">
+                        <a href="/employees" class="btn btn-light me-2">Annuler</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-floppy-disk me-1"></i> Enregistrer les modifications
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+<%- include('../partials/footer') %>

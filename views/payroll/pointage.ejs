@@ -1,0 +1,228 @@
+<%- include('../partials/header') %>
+
+<main class="container my-4 flex-grow-1">
+    <!-- En-Tête de page responsive avec sélection de période -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h2 class="h3 mb-1">Saisie du Pointage Mensuel</h2>
+            <div class="d-flex flex-wrap align-items-center gap-2 mt-2">
+                <!-- Sélecteur dynamique de Période (Mois & Année) -->
+                <form action="/payroll/pointage" method="GET" class="d-flex align-items-center gap-1">
+                    <% 
+                        const moisNoms = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+                        
+                        let defaultMois = 10;
+                        let defaultAnnee = 2026;
+
+                        if (typeof periodeActive !== 'undefined' && periodeActive) {
+                            const parts = periodeActive.trim().split(' ');
+                            if (parts.length >= 2) {
+                                const idx = moisNoms.findIndex(m => m.toLowerCase() === parts[0].toLowerCase());
+                                if (idx !== -1) defaultMois = idx + 1;
+                                const yr = parseInt(parts[1], 10);
+                                if (!isNaN(yr)) defaultAnnee = yr;
+                            }
+                        }
+
+                        const currentMois = (typeof selectedMois !== 'undefined' && selectedMois) ? Number(selectedMois) : defaultMois;
+                        const currentAnnee = (typeof selectedAnnee !== 'undefined' && selectedAnnee) ? Number(selectedAnnee) : defaultAnnee;
+                    %>
+                    <select name="mois" class="form-select form-select-sm fw-semibold" style="min-width: 130px;" onchange="this.form.submit()">
+                        <% moisNoms.forEach((m, idx) => { %>
+                            <option value="<%= idx + 1 %>" <%= currentMois === (idx + 1) ? 'selected' : '' %>><%= m %></option>
+                        <% }); %>
+                    </select>
+                    <select name="annee" class="form-select form-select-sm fw-semibold" onchange="this.form.submit()">
+                        <% for (let y = 2024; y <= 2028; y++) { %>
+                            <option value="<%= y %>" <%= currentAnnee === y ? 'selected' : '' %>><%= y %></option>
+                        <% } %>
+                    </select>
+                </form>
+
+                <!-- Badge de Statut de la Période -->
+                <% if (typeof estCloturee !== 'undefined' && estCloturee) { %>
+                    <span class="badge bg-danger fs-6"><i class="bi bi-lock-fill"></i> Période Clôturée</span>
+                <% } else { %>
+                    <span class="badge bg-success fs-6"><i class="bi bi-unlock-fill"></i> Période Ouverte</span>
+                <% } %>
+
+                <span class="badge bg-secondary fs-6" id="alger-clock">Heure d'Alger : Chargement...</span>
+            </div>
+        </div>
+        <a href="/payroll" class="btn btn-outline-secondary btn-sm align-self-start align-self-md-auto">← Retour au Tableau de Bord</a>
+    </div>
+
+    <!-- Alerte si Période Clôturée -->
+    <% if (typeof estCloturee !== 'undefined' && estCloturee) { %>
+        <div class="alert alert-warning d-flex align-items-center gap-2 mb-4 shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-4 text-warning"></i>
+            <div>
+                <strong>Attention :</strong> Cette période de paie est clôturée. Les données sont affichées en mode lecture seule et ne peuvent plus être modifiées.
+            </div>
+        </div>
+    <% } %>
+
+    <!-- Formulaire de saisie mobile-first -->
+    <form action="/payroll/pointage" method="POST">
+        <!-- Transmission explicite du mois et de l'année concernés -->
+        <input type="hidden" name="mois" value="<%= currentMois %>">
+        <input type="hidden" name="annee" value="<%= currentAnnee %>">
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-2 p-md-4">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-hover align-middle mb-0" style="min-width: 1150px;">
+                        <thead class="table-dark text-center">
+                            <tr>
+                                <th>Matricule</th>
+                                <th>Nom & Prénom</th>
+                                <th>Salaire de Base</th>
+                                <th>Jours Travaillés</th>
+                                <th>Absences</th>
+                                <th>Jours Congé</th>
+                                <th>Jours Panier (Modifiable)</th>
+                                <th>Prime Véhicule (6300) [DZD]</th>
+                                <th>Mutuelle (9000) [DZD]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (employees && employees.length > 0) { %>
+                                <% employees.forEach((emp) => { 
+                                    const absencesVal = emp.absences || 0;
+                                    const congesVal = emp.conge_jours_mois || emp.conges || 0;
+                                    const joursTravaillesDefault = Math.max(0, 30 - absencesVal);
+                                    const joursPanierDefault = Math.max(0, 22 - absencesVal - congesVal);
+                                    const isLocked = typeof estCloturee !== 'undefined' && estCloturee;
+                                %>
+                                    <tr class="pointage-row">
+                                        <td><strong><%= emp.matricule %></strong></td>
+                                        <td><%= emp.nom %> <%= emp.prenom %></td>
+                                        <td class="text-end fw-semibold">
+                                            <%= parseFloat(emp.salaire_de_base || emp.salaire_base || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2 }) %> DZD
+                                        </td>
+                                        <td>
+                                            <input type="number" name="pointage[<%= emp.id %>][joursTravailles]"
+                                                value="<%= emp.joursTravailles !== undefined ? emp.joursTravailles : joursTravaillesDefault %>"
+                                                min="0" max="30" step="0.5"
+                                                class="form-control form-control-sm text-center mx-auto fw-bold text-primary input-travail"
+                                                style="width: 80px;" required <%= isLocked ? 'disabled' : '' %>>
+                                        </td>
+                                        <td>
+                                            <input type="number" name="pointage[<%= emp.id %>][absences]"
+                                                value="<%= absencesVal %>" min="0" max="30" step="0.5"
+                                                class="form-control form-control-sm text-center mx-auto text-danger fw-bold input-absence"
+                                                style="width: 80px;" required <%= isLocked ? 'disabled' : '' %>>
+                                        </td>
+                                        <td>
+                                            <input type="number" name="pointage[<%= emp.id %>][conges]"
+                                                value="<%= congesVal %>" min="0" max="30" step="0.5"
+                                                class="form-control form-control-sm text-center mx-auto text-info fw-bold input-conge"
+                                                style="width: 80px;" required <%= isLocked ? 'disabled' : '' %>>
+                                        </td>
+                                        <td>
+                                            <input type="number" name="pointage[<%= emp.id %>][joursPanier]"
+                                                value="<%= emp.joursPanier !== undefined ? emp.joursPanier : joursPanierDefault %>"
+                                                min="0" max="22" step="1"
+                                                class="form-control form-control-sm text-center mx-auto fw-bold text-success input-panier"
+                                                style="width: 90px;" required <%= isLocked ? 'disabled' : '' %>>
+                                        </td>
+                                        <td>
+                                            <input type="number" name="pointage[<%= emp.id %>][primeVehicule]"
+                                                value="<%= emp.prime_vehicule !== null && emp.prime_vehicule !== undefined ? emp.prime_vehicule : 0 %>"
+                                                min="0" step="0.01"
+                                                class="form-control form-control-sm text-center mx-auto"
+                                                style="width: 100px;" required <%= isLocked ? 'disabled' : '' %>>
+                                        </td>
+                                        <td>
+                                            <input type="number" name="pointage[<%= emp.id %>][cotisationMutuelle]"
+                                                value="<%= emp.cotisation_mutuelle !== null && emp.cotisation_mutuelle !== undefined ? emp.cotisation_mutuelle : 1020.83 %>"
+                                                min="0" step="0.01"
+                                                class="form-control form-control-sm text-center mx-auto"
+                                                style="width: 100px;" required <%= isLocked ? 'disabled' : '' %>>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="9" class="text-center text-muted py-4">
+                                        Aucun employé trouvé en base de données pour cette période.
+                                    </td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Bouton de validation du calcul -->
+                <div class="mt-4 d-grid d-md-flex justify-content-md-end">
+                    <button type="submit" class="btn btn-success btn-lg px-4 shadow-sm" <%= (typeof estCloturee !== 'undefined' && estCloturee) ? 'disabled' : '' %>>
+                        <i class="bi bi-calculator"></i> Enregistrer et Calculer la Paie
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</main>
+
+<!-- Script pour l'horloge et le calcul dynamique avec support de modification manuelle -->
+<script>
+    function updateAlgerClock() {
+        const options = {
+            timeZone: 'Africa/Algiers',
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        };
+        try {
+            const nowString = new Date().toLocaleString('fr-FR', options);
+            document.getElementById('alger-clock').innerText = 'Alger : ' + nowString;
+        } catch (e) {
+            document.getElementById('alger-clock').innerText = 'Alger : Indisponible';
+        }
+    }
+    setInterval(updateAlgerClock, 1000);
+    updateAlgerClock();
+
+    // Calcul automatique des Jours Travaillés et du Panier en temps réel
+    document.querySelectorAll('.pointage-row').forEach(row => {
+        const travailInput = row.querySelector('.input-travail');
+        const absenceInput = row.querySelector('.input-absence');
+        const congeInput = row.querySelector('.input-conge');
+        const panierInput = row.querySelector('.input-panier');
+
+        if (!travailInput || travailInput.disabled) return;
+
+        let userModifiedTravail = false;
+        let userModifiedPanier = false;
+
+        travailInput.addEventListener('input', () => {
+            userModifiedTravail = true;
+        });
+
+        panierInput.addEventListener('input', () => {
+            userModifiedPanier = true;
+        });
+
+        function recalculateValues() {
+            const absence = parseFloat(absenceInput.value) || 0;
+            const conge = parseFloat(congeInput.value) || 0;
+
+            if (!userModifiedTravail) {
+                travailInput.value = Math.max(0, 30 - absence);
+            }
+
+            if (!userModifiedPanier) {
+                panierInput.value = Math.max(0, 22 - absence - conge);
+            }
+        }
+
+        absenceInput.addEventListener('input', recalculateValues);
+        congeInput.addEventListener('input', recalculateValues);
+    });
+</script>
+
+<%- include('../partials/footer') %>

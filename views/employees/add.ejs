@@ -1,0 +1,123 @@
+<%- include('../partials/header') %>
+
+    <div class="container my-4" style="max-width: 800px;">
+        <div class="mb-4">
+            <h2 class="title mb-0">Ajouter un Salarié</h2>
+            <div class="title-bar"></div>
+            <a href="/employees" class="text-decoration-none text-muted small">
+                <i class="fa-solid fa-arrow-left me-1"></i> Retour à la liste
+            </a>
+        </div>
+
+        <div class="card shadow-sm border-0 p-4">
+            <form action="/employees/add" method="POST" class="contact-form">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Matricule (Automatique) *</label>
+                        <input type="text" name="matricule" class="form-control bg-light"
+                            value="<%= typeof nextMatricule !== 'undefined' ? nextMatricule : 'MAT-001' %>" readonly
+                            required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Numéro de Sécurité Sociale (CNAS)</label>
+                        <input type="text" name="num_ss" class="form-control" placeholder="ex: 1600XXXXXXXX">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Nom *</label>
+                        <input type="text" name="nom" class="form-control" placeholder="Nom de famille" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Prénom *</label>
+                        <input type="text" name="prenom" class="form-control" placeholder="Prénom" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Emploi / Poste</label>
+                        <input type="text" name="emploi" class="form-control" placeholder="ex: Développeur Full-Stack">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Section / Atelier</label>
+                        <input type="text" name="section_atelier" class="form-control" placeholder="ex: Technique">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Salaire de Base (DZD) *</label>
+                        <input type="number" step="0.01" name="salaire_de_base" class="form-control"
+                            placeholder="ex: 45000.00" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Horaire Mensuel (Heures)</label>
+                        <input type="number" step="0.01" name="horaire_mensuel" class="form-control" value="173.33">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Date de Naissance</label>
+                        <input type="date" name="date_naissance" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Date de Recrutement</label>
+                        <input type="date" name="date_entree" class="form-control">
+                    </div>
+
+                    <!-- Situation Familiale & Nombre d'enfants -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Situation Familiale</label>
+                        <select name="situation_familiale" class="form-select">
+                            <option value="Marié(e)" selected>Marié(e)</option>
+                            <option value="Célibataire">Célibataire</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Nombre d'enfants</label>
+                        <input type="number" name="nombre_enfants" class="form-control" value="0" min="0">
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label fw-semibold">Adresse</label>
+                        <textarea name="adresse" class="form-control" rows="2"
+                            placeholder="Adresse complète..."></textarea>
+                    </div>
+
+                    <!-- Coordonnées Bancaires / CCP -->
+                    <div class="col-12 mt-4 border-top pt-3">
+                        <h6 class="fw-bold text-primary mb-3">
+                            <i class="fa-solid fa-building-columns me-1"></i> Coordonnées Bancaires / CCP
+                        </h6>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Mode de Paiement</label>
+                        <select name="mode_paiement" class="form-select">
+                            <option value="Virement" selected>Virement Bancaire / CCP</option>
+                            <option value="Chèque">Chèque</option>
+                            <option value="Espèces">Espèces</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-8">
+                        <label class="form-label fw-semibold">N° Compte / RIB / CCP (Account)</label>
+                        <input type="text" name="compte_bancaire" class="form-control" placeholder="ex: 02700721010691100153">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Code SWIFT / BIC</label>
+                        <input type="text" name="swift" class="form-control" placeholder="ex: BNPADZALXXX">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Code Banque (BANK ID)</label>
+                        <input type="text" name="bank_id" class="form-control" placeholder="ex: 0270072101">
+                    </div>
+
+                    <div class="col-12 mt-4">
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+                            <i class="fa-solid fa-floppy-disk me-2"></i> Enregistrer le Salarié
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<%- include('../partials/footer') %>

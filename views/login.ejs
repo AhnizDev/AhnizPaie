@@ -1,0 +1,50 @@
+<%- include('partials/header') %>
+
+<main class="container my-5 flex-grow-1 d-flex align-items-center justify-content-center">
+    <div class="card shadow-sm p-4" style="max-width: 400px; width: 100%;">
+        <div class="text-center mb-4">
+            <h3 class="fw-bold text-primary"><i class="fa-solid fa-lock"></i> Connexion</h3>
+            <p class="text-muted small">Accès au système AhnizPaie</p>
+        </div>
+
+        <% if (typeof error !=='undefined' && error) { %>
+            <div class="alert alert-danger py-2" role="alert">
+                <i class="fa-solid fa-circle-exclamation me-1"></i>
+                <%= error %>
+            </div>
+        <% } %>
+
+        <form action="/login" method="POST">
+            <div class="mb-3">
+                <label for="username" class="form-label font-weight-bold">Nom d'utilisateur</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                    <input type="text" class="form-control" id="username" name="username"
+                        placeholder="ex: admin" required autofocus>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="password" class="form-label font-weight-bold">Mot de passe</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa-solid fa-key"></i></span>
+                    <input type="password" class="form-control" id="password" name="password"
+                        placeholder="••••••••" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 fw-bold">
+                <i class="fa-solid fa-right-to-bracket me-1"></i> Se connecter
+            </button>
+        </form>
+
+        <!-- Lien vers le guide à l'intérieur du Card -->
+        <div class="text-center mt-3 pt-3 border-top">
+            <a href="/guide" class="text-decoration-none small text-secondary fw-bold">
+                <i class="fa-solid fa-book-open me-1 text-primary"></i> Guide & Manuel d'utilisation
+            </a>
+        </div>
+    </div>
+</main>
+
+<%- include('partials/footer') %>

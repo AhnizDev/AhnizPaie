@@ -1,0 +1,85 @@
+<%- include('../partials/header') %>
+
+<main class="container my-4 flex-grow-1">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h2 class="h4 font-weight-bold text-dark mb-0">
+                <i class="fa-solid fa-list-check me-2 text-primary"></i>Gestion des Rubriques
+            </h2>
+            <small class="text-muted">Configuration des primes, indemnités et retenues</small>
+        </div>
+        <div>
+            <a href="/rubriques/add" class="btn btn-primary shadow-sm">
+                <i class="fa-solid fa-plus me-1"></i> Nouvelle Rubrique
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Code</th>
+                            <th>Libellé</th>
+                            <th>Type</th>
+                            <th class="text-center">Taux Salarié</th>
+                            <th class="text-center">Taux Patronal</th>
+                            <th class="text-end pe-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (typeof rubriques !== 'undefined' && rubriques && rubriques.length > 0) { %>
+                            <% rubriques.forEach(r => { %>
+                                <tr>
+                                    <td class="ps-3 fw-bold text-primary"><%= String(r.code).padStart(4, '0') %></td>
+                                    <td class="fw-semibold"><%= r.libelle %></td>
+                                    <td>
+                                        <% if (r.type_rubrique === 'gain') { %>
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">GAIN</span>
+                                        <% } else if (r.type_rubrique === 'retenue') { %>
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">RETENUE</span>
+                                        <% } else if (r.type_rubrique === 'patronale') { %>
+                                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">PATRONALE</span>
+                                        <% } else { %>
+                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">AUTRE</span>
+                                        <% } %>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-dark border">
+                                            <%= Number(r.taux_salarie).toFixed(2) %> %
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-dark border">
+                                            <%= Number(r.taux_patronal).toFixed(2) %> %
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        <a href="/rubriques/edit/<%= r.id %>" class="btn btn-sm btn-outline-primary me-1" title="Modifier">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </a>
+                                        <form action="/rubriques/delete/<%= r.id %>" method="POST" class="d-inline" onsubmit="return confirm('Supprimer cette rubrique ?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    Aucune rubrique configurée.
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<%- include('../partials/footer') %>
